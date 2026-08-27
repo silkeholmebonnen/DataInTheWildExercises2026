@@ -44,9 +44,10 @@ class WikiSpider(scrapy.Spider):
     # your spider's name, it must be unique
     name = "wiki_minimal"
 
-    def start_requests(self):
+    async def start(self):
         """
         Execute for the very first time the crawler runs, mainly useful to provide the seed urls to crawl
+        (in Scrapy < 2.13 this method was called start_requests and was not async)
         """
         yield scrapy.Request(url='https://en.wikipedia.org/wiki/Bruce_Dickinson', 
                              callback=self.parse_artist)
@@ -101,7 +102,7 @@ class WikiSpider(scrapy.Spider):
             if row_title == 'Member of' or row_title == 'Formerly of':
                 band_url = row.css('td > a::attr(href)').get()
                 band_urls.append(band_url)
-        band_urls = ['https://en.wikipedia.org/'+url for url in band_urls]
+        band_urls = [response.urljoin(url) for url in band_urls]
         
         print(artist_item)
         # yield the item
