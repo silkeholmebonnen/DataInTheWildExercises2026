@@ -222,3 +222,7 @@ __marimo__/
 .python-version
 .vscode/
 *.json
+
+# uv package management
+pyproject.toml
+uv.lock
