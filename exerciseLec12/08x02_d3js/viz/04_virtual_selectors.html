@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+   <p id="id1">Henlo!</p>
+   <p class="class1">Me want chickem nuggerz</p>
+</body>
+
+<script>
+var mylist = ["one", "two", "three"];
+d3.select("body").selectAll("div").data(mylist).enter().append("div").text(function (d,i) {
+                  return d + " nuggerz!" ;
+                  });
+</script>
+</html>

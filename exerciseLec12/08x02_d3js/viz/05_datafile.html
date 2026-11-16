@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+   <p>Them doggos:</p>
+</body>
+
+<script>
+d3.csv("input.csv").then(function(data) {mycallback_funct(data)})
+
+function mycallback_funct(data, svg)
+{
+   console.log(data)
+   d3.select("body").selectAll("div")
+                    .data(data)
+                    .enter()
+                    .append("div")
+                    .text(function (d)
+                    { return d.doggo_name ;}
+                    );
+}
+</script>
+</html>

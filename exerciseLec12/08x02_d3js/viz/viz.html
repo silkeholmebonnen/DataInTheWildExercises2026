@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8"/>
+
+<head>
+    <link rel="shortcut icon" href="#">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+
+<br>
+  <form id="filter">
+    <b>Filter doggos by size:</b>
+    <input id="check_big" value="large" type="checkbox" checked>Big bois</input>
+    <input id="check_small" value="small" type="checkbox" checked >Tiny doggos</input>
+     <br>
+     <br>
+  </form>
+<body>
+
+
+
+
+<script>
+
+// set the dimensions and margins of the plot
+var margin = {top: 10, right: 20, bottom: 0, left: 20};
+var width = 300 - margin.left - margin.right;
+var height = 300 - margin.top - margin.bottom;
+// the size of the svg incudes the size of the plot + margins + some space for tick labels
+var svgWidth = width+margin.right+margin.left
+var svgHeight = height+margin.top+margin.bottom+20
+
+// create a linear scale to map data to pixels, "domain" is the range of data and "range" is the pixel range
+var xScale = d3.scaleLinear().domain([0,10]).range([0,width]);
+// for the y-scale, the numbers in "range" are reversed compared to the x-axis, because by default pixels are indexed from top to bottom, while a plot has low values on the bottom and high values on top
+var yScale = d3.scaleLinear().domain([0,60]).range([height,0]);
+
+var svg = d3.select("body").append("svg")
+                           .attr("width", svgWidth)
+                           .attr("height", svgHeight) 
+                           .append("g")
+                           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// add x-axis
+// create an axis based on the linear scale
+var xAxis = d3.axisBottom(xScale);
+// the x-axis is normally drawn at the top of the page. To bring it at the bottom, translation is needed
+// the <g> tag is a container used to group other SVG elements
+// the variable xAxis contains a function that is called inside the <g> tag to create the axis
+xAxis = svg.append("g").attr("transform", "translate(0," + height + ")").call(xAxis);
+// add x-axis label
+xAxis.append("text")
+     .text("Nuggers (number)")
+     .style("fill", "black")
+     .attr("x", xScale(9))
+     .attr("dy", "-1em")
+
+// .ticks sets the number of ticks on the axis
+var yAxis = d3.axisLeft(yScale).ticks(10);
+yAxis = svg.append("g").call(yAxis);
+// add y-axis label
+yAxis.append("text")
+     .text("Bepis (liter)")
+     .style("fill", "black")
+     .attr("dy", "1em")
+     .attr("transform", "rotate(-90)")
+
+// load the data and handle it with the visualize_scatter function
+d3.csv("input.csv").then(function(data) {visualize_scatter(data, svg)})
+
+
+
+function visualize_scatter(data, svg)
+{
+
+// Use the code below to extract the range of x,y data automatically
+//var xExtent = d3.extent(data, function(d){return d.number_nuggerz})
+//var yExtent = d3.extent(data, function(d){return d.liter_bepis})
+
+
+// create circles with bound data
+// at this stage, the circles have data associated with them but their properties are not initialized
+var circles = svg.append("g") // append a new group
+                 .selectAll("circle") // select all the circles (no circle is existing yet)
+                 .data(data) // bind the data to the circles 
+                 .enter() // create a number of circles with boud data equal to the number of datapoints
+                 .append("circle") // append the circles under the <g> tag
+                 .attr("cx", function(d){return xScale(d.number_nuggerz)}) // change the x position of circles 
+                 .attr("cy", function(d){return yScale(d.liter_bepis)}) // change the y position of circles 
+                 .attr("r", function(d){return d.weight}) // set the radius
+                 .style("fill", color) // set the fill color
+                 .on("mouseover", handle_mouseover)
+                 .on("mouseout", handle_mouseout);
+
+}
+
+function color(d)
+{if (d.size=="large") {return "#F5A6E6"} else {return "#65A6E6"}}
+
+function handle_mouseover(event, d)
+{
+        d3.select(this).style("fill","red");
+
+        svg.append("svg:image")
+        .attr('id', 'doggoimg')
+        .attr('x', xScale(6))
+        .attr('y', yScale(30))
+        .attr('width', 100)
+        .attr('height', 100)
+        .attr("xlink:href", "pics/"+d.img)
+
+        svg.append("text")
+             .text(d.doggo_name)
+             .style("fill", "black")
+             .attr('x', xScale(d.number_nuggerz))
+             .attr('y', yScale(d.liter_bepis))
+             .attr('id', 'doggotext')
+     
+}
+
+function handle_mouseout(event, d)
+{
+        d3.select(this).style("fill",color(d));
+        d3.select("#doggoimg").remove();
+        d3.select("#doggotext").remove();
+}
+
+function handle_checkbox()
+{
+     if(d3.select("#check_big").property("checked"))
+     {
+          svg.selectAll("circle").filter(function(d) {return d.size == "large"}).style("opacity", 100);
+     } 
+     else
+     {
+          svg.selectAll("circle").filter(function(d) {return d.size == "large"}).style("opacity", 0);
+     }  
+     if(d3.select("#check_small").property("checked"))
+     {
+          svg.selectAll("circle").filter(function(d) {return d.size == "small"}).style("opacity", 100);
+     } 
+     else
+     {
+          svg.selectAll("circle").filter(function(d) {return d.size == "small"}).style("opacity", 0);
+     }  
+     //svg.selectAll("circle")
+     // .filter(function(d) {return f == d.size;})
+     // .attr("display", display);
+}
+d3.select("#filter").on("change",handle_checkbox);
+</script>
+
+
+
+
+</body>
+</html>
